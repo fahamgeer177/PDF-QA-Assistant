@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document QA Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #f4f7fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 700px;
+      width: 90%;
+      margin-top: 60px;
+      padding: 30px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 24px;
+      text-align: center;
+      color: #1a202c;
+    }
+    label {
+      font-weight: 600;
+      margin-top: 12px;
+      display: block;
+    }
+    input[type="file"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #4f46e5;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #3730a3;
+    }
+    pre {
+      background: #edf2f7;
+      padding: 16px;
+      margin-top: 20px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 16px; /* Bigger font size */
+      line-height: 1.6;
+      color: #2d3748; /* Darker text color */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Document QA Assistant</h1>
+
+    <label for="fileInput">Upload Document</label>
+    <input type="file" id="fileInput" />
+
+    <button onclick="uploadFile()">Upload & Process</button>
+
+    <label for="questionInput">Ask a Question</label>
+    <input type="text" id="questionInput" placeholder="Type your question..." />
+    <button onclick="askQuestion()">Ask</button>
+
+    <pre id="answerBox">Answer will appear here...</pre>
+  </div>
+
+  <script>
+    function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      const answerBox = document.getElementById('answerBox');
+      answerBox.textContent = 'Uploading and processing document...';
+
+      if (!file) {
+        alert("Please select a file first.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      fetch("/upload", {
+        method: "POST",
+        body: formData,
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message) {
+          answerBox.textContent = "✅ " + data.message;
+        } else {
+          answerBox.textContent = "❌ " + data.error;
+        }
+      });
+    }
+
+    async function handleFileUpload(event) {
+      event.preventDefault();
+
+      const formData = new FormData();
+      formData.append('file', document.getElementById('fileInput').files[0]);
+
+      // Reset the chat history and previous document processing
+      await fetch('/reset-document', { method: 'POST' });
+
+      // Upload new document
+      const res = await fetch('/upload-document', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        alert('Document uploaded successfully!');
+      } else {
+        alert('Error uploading document');
+      }
+    }
+
+    function askQuestion() {
+      const question = document.getElementById('questionInput').value;
+      const answerBox = document.getElementById('answerBox');
+      answerBox.textContent = 'Thinking...';
+
+      if (!question) {
+        alert("Please type a question.");
+        return;
+      }
+
+      fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        answerBox.textContent = data.answer || "❌ " + data.error;
+      });
+    }
+  </script>
+</body>
+</html>
