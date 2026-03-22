@@ -2,6 +2,8 @@
 
 Ask questions from your documents (PDF, DOCX, PPTX) using an LLM-powered retrieval pipeline.
 
+https://github.com/user-attachments/assets/67bf631d-6258-43b4-8930-a36a940843d4
+
 ## ✨ Features
 
 - 📤 Upload and process documents from a clean web UI
@@ -123,7 +125,7 @@ Pull requests and improvements are welcome. Feel free to fork and enhance this p
 
 ## 📄 License
 
-Add your preferred license (MIT, Apache-2.0, etc.) before publishing.
+MIT
 
 ---
 
